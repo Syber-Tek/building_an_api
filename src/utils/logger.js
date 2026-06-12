@@ -5,6 +5,14 @@ function logAlert(deviceId) {
   });
 }
 
+function addHistory(monitor, type) {
+  monitor.history.push({
+    type,
+    time: new Date().toISOString(),
+  });
+}
+
 module.exports = {
   logAlert,
+  addHistory,
 };

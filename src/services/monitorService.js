@@ -1,10 +1,16 @@
+
 const monitors = require("../data/monitors");
 
-const { logAlert } = require("../utils/logger");
+const {
+  logAlert,
+  addHistory
+} = require("../utils/logger");
 
 function startTimer(monitor) {
   monitor.timer = setTimeout(() => {
     monitor.status = "down";
+
+    addHistory(monitor, "ALERT");
 
     logAlert(monitor.id);
   }, monitor.timeout * 1000);
@@ -18,6 +24,7 @@ function cleanMonitorResponse(monitor) {
     status: monitor.status,
     paused: monitor.paused,
     lastHeartbeat: monitor.lastHeartbeat,
+    history: monitor.history
   };
 }
 
@@ -26,19 +33,19 @@ function createMonitor(data) {
 
   if (!id || !timeout || !alert_email) {
     return {
-      error: "All fields are required",
+      error: "All fields are required"
     };
   }
 
   if (timeout <= 0) {
     return {
-      error: "Timeout must be greater than 0",
+      error: "Timeout must be greater than 0"
     };
   }
 
   if (monitors.has(id)) {
     return {
-      error: "Monitor already exists",
+      error: "Monitor already exists"
     };
   }
 
@@ -50,7 +57,10 @@ function createMonitor(data) {
     paused: false,
     timer: null,
     lastHeartbeat: new Date().toISOString(),
+    history: []
   };
+
+  addHistory(monitor, "CREATED");
 
   startTimer(monitor);
 
@@ -74,6 +84,8 @@ function heartbeatMonitor(id) {
 
   monitor.lastHeartbeat = new Date().toISOString();
 
+  addHistory(monitor, "HEARTBEAT");
+
   startTimer(monitor);
 
   return cleanMonitorResponse(monitor);
@@ -92,6 +104,8 @@ function pauseMonitor(id) {
 
   monitor.status = "paused";
 
+  addHistory(monitor, "PAUSED");
+
   return cleanMonitorResponse(monitor);
 }
 
@@ -103,5 +117,5 @@ module.exports = {
   createMonitor,
   heartbeatMonitor,
   pauseMonitor,
-  getAllMonitors,
+  getAllMonitors
 };
