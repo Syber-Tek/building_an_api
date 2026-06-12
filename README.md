@@ -132,5 +132,4 @@ Example Output:
 }
 ```
 
----
-*Developed by Syber-Tek for the CritMon Internship Challenge.*
+
